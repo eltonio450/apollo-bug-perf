@@ -12,9 +12,15 @@ import {
 } from "@apollo/client";
 
 import { link } from "./link.js";
-import { Subscriptions } from "./subscriptions.jsx";
 import { Layout } from "./layout.jsx";
 import "./index.css";
+import { cacheSizes } from '@apollo/client/utilities';
+
+cacheSizes["inMemoryCache.executeSelectionSet"] = 100000;
+
+//cacheSizes.reset()
+
+
 
 const ALL_PEOPLE = gql`
   query AllPeople {
@@ -71,14 +77,19 @@ function App() {
           </div>
         </>
       )}
+  <pre>
+      {JSON.stringify(client.getMemoryInternals(), null, 2)}</pre>
     </main>
   );
 }
 
 const client = new ApolloClient({
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    resultCacheMaxSize: Math.pow(2,20)
+  }),
   link,
 });
+
 
 const container = document.getElementById("root");
 const root = createRoot(container);
@@ -89,7 +100,6 @@ root.render(
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<App />} />
-          <Route path="subscriptions-wslink" element={<Subscriptions />} />
         </Route>
       </Routes>
     </Router>
